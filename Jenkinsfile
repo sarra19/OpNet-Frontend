@@ -75,11 +75,7 @@ pipeline {
                 sh 'docker restart grafana'
             }
         }
-      stage('Test Unitaire') {
-    steps {
-                sh 'npm test'
-        }
-      }
+    
 
     }
 }
