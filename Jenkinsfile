@@ -27,9 +27,9 @@ pipeline {
         //                     -Dsonar.projectKey=reactapp \
         //                     -Dsonar.sources=src \
         //                     -Dsonar.host.url=http://172.20.10.6:9000 \
-        //                     -Dsonar.login=squ_1c3c60b25d705400f72e0891b2ee773780fd8830"
+        //                     -Dsonar.login=squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e"
         //             }
-        //         }squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e
+        //         }
         //     }
         // }
             stage('Docker build') {
@@ -51,19 +51,33 @@ pipeline {
                 sh 'npm start &'
             }
         }
-        stage('Deploy to Nexus') {
-            steps {
-                script {
-                    def registryCredentials = 'nexus'
-                    def registry = '172.20.10.6:8083'
+        // stage('Deploy to Nexus') {
+        //     steps {
+        //         script {
+        //             def registryCredentials = 'nexus'
+        //             def registry = '172.20.10.6:8083'
                     
-                    docker.withRegistry("http://${registry}", registryCredentials) {
-                        sh "docker push ${registry}/repository/docker-repo:1.0.0"
-                    }
-                }
+        //             docker.withRegistry("http://${registry}", registryCredentials) {
+        //                 sh "docker push ${registry}/repository/docker-repo:1.0.0"
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Run prometheus') {
+            steps {
+                sh 'docker restart prometheus'
             }
         }
-
-      
+        stage('Run Grafana') {
+            steps {
+                sh 'docker restart grafana'
+            }
+        }
+          stage('Mockito') {
+            steps {
+                sh 'mvn test'
+            }
+        }
     }
 }
