@@ -18,20 +18,21 @@ pipeline {
             }
         }
 
-        // stage('SonarQube Analysis') {
-        //     steps{
-        //         script {
-        //         def scannerHome = tool 'scanner'
-        //          withSonarQubeEnv{
-        //         sh "${scannerHome}/bin/sonar-scanner \
-        //                     -Dsonar.projectKey=reactapp \
-        //                     -Dsonar.sources=src \
-        //                     -Dsonar.host.url=http://172.20.10.6:9000 \
-        //                     -Dsonar.login=squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e"
-        //             }
-        //         }
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+            steps{
+                script {
+                def scannerHome = tool 'scanner'
+                 withSonarQubeEnv{
+                sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=reactapp \
+                            -Dsonar.sources=src \
+                            -Dsonar.host.url=http://172.20.10.6:9000 \
+                            -Dsonar.login=squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e"
+                    }
+                }
+            }
+        }
+        
             stage('Docker build') {
             steps {
                 sh 'docker build -t farahtelli/opnet:1.0.0 .'
@@ -74,10 +75,15 @@ pipeline {
                 sh 'docker restart grafana'
             }
         }
-          stage('Mockito') {
-            steps {
-                sh 'mvn test'
+      stage('Test Unitaire') {
+    steps {
+        script {
+            node {
+                sh 'npm test'
             }
         }
+    }
+}
+
     }
 }
