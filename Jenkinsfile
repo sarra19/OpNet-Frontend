@@ -32,7 +32,7 @@ pipeline {
                 }
             }
         }
-        
+
             stage('Docker build') {
             steps {
                 sh 'docker build -t farahtelli/opnet:1.0.0 .'
@@ -77,13 +77,9 @@ pipeline {
         }
       stage('Test Unitaire') {
     steps {
-        script {
-            node {
                 sh 'npm test'
-            }
         }
-    }
-}
+      }
 
     }
 }
