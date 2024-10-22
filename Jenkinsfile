@@ -1,11 +1,7 @@
 pipeline {
     agent any
-//     environment {
-//     registryCredentials = "nexus"
-//     registry = "172.20.10.6:8083"
-// }
+
     stages {
-        
         stage('Install Frontend dependencies') {
             steps {
                 sh 'npm install --force'
@@ -19,28 +15,32 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps{
+            steps {
                 script {
                     def scannerHome = tool 'scanner'  // Ensure 'scanner' matches your tool configuration name
+                    def sonarToken = credentials('sonar-token')  // Replace with your actual Jenkins credential ID for SonarQube
                     withSonarQubeEnv('SonarQube') {  // Replace 'SonarQube' with your actual SonarQube installation name if it's different
-                        sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=reactapp \
-                            -Dsonar.sources=src \
-                            -Dsonar.host.url=http://192.168.52.4:9000 \  // Corrected URL
-                            -Dsonar.login=squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e"
+                        sh "${scannerHome}/bin/sonar-scanner " +
+                           "-Dsonar.projectKey=reactapp " +
+                           "-Dsonar.sources=src " +
+                           "-Dsonar.host.url=http://192.168.52.4:9000 " +
+                           "-Dsonar.login=${sonarToken}"
                     }
                 }
             }
         }
-            stage('Docker build') {
+
+        stage('Docker build') {
             steps {
                 sh 'docker build -t farahtelli/opnet:1.0.0 .'
             }
         }
-          stage('Deploying to DockerHub') {
+
+        stage('Deploying to DockerHub') {
             steps {
                 sh '''
-                docker login -u farahtelli -p farouha2323
+                echo "Logging into DockerHub..."
+                echo $DOCKER_PASSWORD | docker login -u farahtelli --password-stdin
                 docker push farahtelli/opnet:1.0.0
                 '''
             }
@@ -51,34 +51,23 @@ pipeline {
                 sh 'npm start &'
             }
         }
-        // stage('Deploy to Nexus') {
-        //     steps {
-        //         script {
-        //             def registryCredentials = 'nexus'
-        //             def registry = '172.20.10.6:8083'
-                    
-        //             docker.withRegistry("http://${registry}", registryCredentials) {
-        //                 sh "docker push ${registry}/repository/docker-repo:1.0.0"
-        //             }
-        //         }
-        //     }
-        // }
 
-        stage('Run prometheus') {
+        stage('Run Prometheus') {
             steps {
                 sh 'docker restart prometheus'
             }
         }
+
         stage('Run Grafana') {
             steps {
                 sh 'docker restart grafana'
             }
         }
-      stage('Test Unitaire') {
-    steps {
-                sh 'npm test'
-    }
-}
 
+        stage('Unit Test') {
+            steps {
+                sh 'npm test'
+            }
+        }
     }
 }
