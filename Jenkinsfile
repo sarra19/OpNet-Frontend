@@ -18,12 +18,13 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'scanner'  // This should match your configured SonarQube scanner name
+                    def sonarToken = credentials('scanner') // Retrieve the token from Jenkins credentials
                     withSonarQubeEnv('scanner') {  // Ensure this matches your configured SonarQube server name
                         sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=reactapp \
                             -Dsonar.sources=src \
                             -Dsonar.host.url=http://192.168.52.4:9000 \
-                            -Dsonar.login=squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e"
+                            -Dsonar.login=${sonarToken}"
                     }
                 }
             }
