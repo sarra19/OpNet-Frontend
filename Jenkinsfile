@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'scanner'  // This should match your configured SonarQube scanner name
-                    withSonarQubeEnv('SonarQube') {  // Ensure this matches your configured SonarQube server name
+                    withSonarQubeEnv('scanner') {  // Ensure this matches your configured SonarQube server name
                         sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=reactapp \
                             -Dsonar.sources=src \
