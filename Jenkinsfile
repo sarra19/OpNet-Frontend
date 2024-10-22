@@ -21,12 +21,12 @@ pipeline {
         stage('SonarQube Analysis') {
             steps{
                 script {
-                def scannerHome = tool 'scanner'
-                 withSonarQubeEnv{
-                sh "${scannerHome}/bin/sonar-scanner \
+                    def scannerHome = tool 'scanner'  // Ensure 'scanner' matches your tool configuration name
+                    withSonarQubeEnv('SonarQube') {  // Replace 'SonarQube' with your actual SonarQube installation name if it's different
+                        sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=reactapp \
                             -Dsonar.sources=src \
-                            -Dsonar.host.url=http://192.168.52.4/:9000 \
+                            -Dsonar.host.url=http://192.168.52.4:9000 \  // Corrected URL
                             -Dsonar.login=squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e"
                     }
                 }
