@@ -17,14 +17,13 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'scanner'  // Ensure 'scanner' matches your tool configuration name
-                    def sonarToken = credentials('sonar-token')  // Replace with your actual Jenkins credential ID for SonarQube
-                    withSonarQubeEnv('SonarQube') {  // Replace 'SonarQube' with your actual SonarQube installation name if it's different
-                        sh "${scannerHome}/bin/sonar-scanner " +
-                           "-Dsonar.projectKey=reactapp " +
-                           "-Dsonar.sources=src " +
-                           "-Dsonar.host.url=http://192.168.52.4:9000 " +
-                           "-Dsonar.login=${sonarToken}"
+                    def scannerHome = tool 'scanner'  // This should match your configured SonarQube scanner name
+                    withSonarQubeEnv('SonarQube') {  // Ensure this matches your configured SonarQube server name
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=reactapp \
+                            -Dsonar.sources=src \
+                            -Dsonar.host.url=http://192.168.52.4:9000 \
+                            -Dsonar.login=squ_36eb9cc444e1024b52819e1249830e65ee4f1a0e"
                     }
                 }
             }
@@ -39,20 +38,19 @@ pipeline {
         stage('Deploying to DockerHub') {
             steps {
                 sh '''
-                echo "Logging into DockerHub..."
-                echo $DOCKER_PASSWORD | docker login -u farahtelli --password-stdin
+                docker login -u farahtelli -p farouha2323
                 docker push farahtelli/opnet:1.0.0
                 '''
             }
         }
-             
+
         stage('Start application') {
             steps {
                 sh 'npm start &'
             }
         }
 
-        stage('Run Prometheus') {
+        stage('Run prometheus') {
             steps {
                 sh 'docker restart prometheus'
             }
@@ -64,7 +62,7 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
+        stage('Test Unitaire') {
             steps {
                 sh 'npm test'
             }
